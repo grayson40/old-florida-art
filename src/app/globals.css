@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Old Florida Theme Colors */
+    --background: 250 248 246; /* florida-sand-50 */
+    --foreground: 26 43 33; /* florida-green-900 */
+    --card: 241 237 228; /* florida-sand-100 */
+    --card-foreground: 26 43 33; /* florida-green-900 */
+    --popover: 241 237 228; /* florida-sand-100 */
+    --popover-foreground: 26 43 33; /* florida-green-900 */
+    --primary: 90 128 99; /* florida-green-500 */
+    --primary-foreground: 240 244 241; /* florida-green-50 */
+    --secondary: 227 201 174; /* florida-sand-300 */
+    --secondary-foreground: 42 48 34; /* florida-green-800 */
+    --muted: 227 219 201; /* florida-sand-200 */
+    --muted-foreground: 87 80 58; /* florida-sand-800 */
+    --accent: 230 128 46; /* florida-sunset-500 */
+    --accent-foreground: 254 247 240; /* florida-sunset-50 */
+    --destructive: 232 93 93; /* florida-flamingo-500 */
+    --destructive-foreground: 254 245 245; /* florida-flamingo-50 */
+    --border: 213 201 174; /* florida-sand-300 */
+    --input: 199 183 147; /* florida-sand-400 */
+    --ring: 90 128 99; /* florida-green-500 */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 26 43 33; /* florida-green-900 */
+    --foreground: 240 244 241; /* florida-green-50 */
+    --card: 42 64 50; /* florida-green-800 */
+    --card-foreground: 240 244 241; /* florida-green-50 */
+    --popover: 42 64 50; /* florida-green-800 */
+    --popover-foreground: 240 244 241; /* florida-green-50 */
+    --primary: 90 128 99; /* florida-green-500 */
+    --primary-foreground: 240 244 241; /* florida-green-50 */
+    --secondary: 58 86 66; /* florida-green-700 */
+    --secondary-foreground: 240 244 241; /* florida-green-50 */
+    --muted: 42 64 50; /* florida-green-800 */
+    --muted-foreground: 181 203 185; /* florida-green-200 */
+    --accent: 230 128 46; /* florida-sunset-500 */
+    --accent-foreground: 254 247 240; /* florida-sunset-50 */
+    --destructive: 232 93 93; /* florida-flamingo-500 */
+    --destructive-foreground: 254 245 245; /* florida-flamingo-50 */
+    --border: 58 86 66; /* florida-green-700 */
+    --input: 42 64 50; /* florida-green-800 */
+    --ring: 90 128 99; /* florida-green-500 */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-florida-body;
+  }
+}
+
+/* Custom Florida-themed styles */
+.florida-bg-texture {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23f1ede4' fill-opacity='0.4'%3E%3Cpath d='M30 30c0-6.627-5.373-12-12-12s-12 5.373-12 12 5.373 12 12 12 12-5.373 12-12zm12 0c0-6.627-5.373-12-12-12s-12 5.373-12 12 5.373 12 12 12 12-5.373 12-12z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.florida-gradient {
+  background: linear-gradient(135deg, 
+    theme('colors.florida.sand.50') 0%, 
+    theme('colors.florida.blue.50') 50%, 
+    theme('colors.florida.green.50') 100%
+  );
+} 
