@@ -62,7 +62,7 @@ export default function HomePage() {
 
           <div className="text-center">
             <Button asChild variant="outline" size="lg" className="border-florida-green-300 text-florida-green-700 hover:bg-florida-green-50">
-              <Link href="/posters" className="flex items-center space-x-2">
+              <Link href="/prints" className="flex items-center space-x-2">
                 <span>View All Prints</span>
                 <ArrowRight className="h-5 w-5" />
               </Link>
@@ -179,7 +179,7 @@ export default function HomePage() {
             <div className="space-y-4">
               <h4 className="font-florida-display font-semibold">Shop</h4>
               <div className="space-y-2 text-sm">
-                <div><Link href="/posters" className="text-florida-green-200 hover:text-white">All Prints</Link></div>
+                <div><Link href="/prints" className="text-florida-green-200 hover:text-white">All Prints</Link></div>
                 <div><Link href="/styles" className="text-florida-green-200 hover:text-white">Art Styles</Link></div>
                 <div><Link href="/collections" className="text-florida-green-200 hover:text-white">Collections</Link></div>
               </div>

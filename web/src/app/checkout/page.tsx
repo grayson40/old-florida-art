@@ -80,7 +80,7 @@ export default function CheckoutPage() {
               Add some beautiful prints to your cart before checking out.
             </p>
             <Button variant="florida" asChild>
-              <Link href="/posters">
+              <Link href="/prints">
                 Browse Prints
               </Link>
             </Button>
@@ -108,7 +108,7 @@ export default function CheckoutPage() {
             </p>
             <div className="space-y-4">
               <Button variant="florida" asChild>
-                <Link href="/posters">
+                <Link href="/prints">
                   Continue Shopping
                 </Link>
               </Button>
@@ -134,7 +134,7 @@ export default function CheckoutPage() {
         {/* Header */}
         <div className="mb-8">
           <Link 
-            href="/posters" 
+            href="/prints" 
             className="inline-flex items-center text-florida-green-600 hover:text-florida-green-800 mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

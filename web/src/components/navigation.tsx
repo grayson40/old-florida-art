@@ -19,7 +19,7 @@ export function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="flex items-center space-x-1">
-              <Waves className="h-8 w-8 text-florida-blue-600" />
+              {/* <Waves className="h-8 w-8 text-florida-blue-600" /> */}
               <Palmtree className="h-8 w-8 text-florida-green-600" />
             </div>
             <div className="flex flex-col">
@@ -35,7 +35,7 @@ export function Navigation() {
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
             <Link 
-              href="/posters" 
+              href="/prints" 
               className="text-florida-green-700 hover:text-florida-green-900 font-medium transition-colors"
             >
               Prints
@@ -70,7 +70,7 @@ export function Navigation() {
               )}
             </Button>
             <Button variant="florida" size="sm" className="hidden sm:inline-flex" asChild>
-              <Link href="/posters">
+              <Link href="/prints">
                 Shop Now
               </Link>
             </Button>

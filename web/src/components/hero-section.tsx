@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowRight, MapPin } from 'lucide-react'
+import { ArrowRight, MapPin, Flower, Leaf } from 'lucide-react'
 
 export function HeroSection() {
   return (
@@ -11,18 +11,28 @@ export function HeroSection() {
       <div className="absolute inset-0 florida-gradient opacity-90" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-florida-sand-50/20 to-florida-sand-100/40" />
       
-      {/* Decorative Elements */}
-      <div className="absolute top-20 left-10 opacity-20 rotate-12">
-        <div className="w-32 h-32 border-2 border-florida-green-300 rounded-full" />
+      {/* Decorative Botanical Elements */}
+      <div className="absolute top-20 left-10 opacity-15 rotate-12">
+          <Flower className="w-32 h-32 text-florida-flamingo-300" />
       </div>
-      <div className="absolute bottom-20 right-10 opacity-20 -rotate-12">
-        <div className="w-24 h-24 border-2 border-florida-sunset-300 rounded-full" />
+      <div className="absolute top-42 right-20 opacity-20 -rotate-45">
+        <Flower className="w-28 h-28 text-florida-flamingo-300" />
+      </div>
+      <div className="absolute bottom-32 left-1/4 opacity-15 rotate-45">
+        <Leaf className="w-20 h-20 text-florida-green-300" />
+      </div>
+      
+      <div className="absolute top-1/3 left-1/6 opacity-10 rotate-90">
+        <Flower className="w-16 h-16 text-florida-sunset-300" />
+      </div>
+      <div className="absolute bottom-1/3 right-1/5 opacity-15 -rotate-30">
+        <Leaf className="w-12 h-12 text-florida-blue-300" />
       </div>
       
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="space-y-8">
           {/* Main Heading */}
-          <div className="space-y-4 mt-12">
+          <div className="space-y-4 mt-16">
             <h1 className="font-florida-script text-6xl sm:text-7xl lg:text-8xl text-florida-green-800 drop-shadow-sm">
               Old Florida
             </h1>
@@ -51,8 +61,8 @@ export function HeroSection() {
               size="lg" 
               className="w-full sm:w-auto text-lg px-8 py-6"
             >
-              <Link href="/posters" className="flex items-center space-x-2">
-                <span>Explore Collection</span>
+              <Link href="/prints" className="flex items-center space-x-2">
+                <span>Shop Prints</span>
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </Button>
@@ -66,37 +76,6 @@ export function HeroSection() {
                 View Surf Breaks
               </Link>
             </Button>
-          </div>
-
-          {/* Features */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12 max-w-3xl mx-auto">
-            <div className="text-center space-y-2">
-              <div className="text-2xl">🏄‍♂️</div>
-              <h3 className="font-florida-display font-semibold text-florida-green-800">
-                Authentic Breaks
-              </h3>
-              <p className="text-sm text-florida-green-600">
-                Real Florida surf spots mapped with precision
-              </p>
-            </div>
-            <div className="text-center space-y-2">
-              <div className="text-2xl">🎨</div>
-              <h3 className="font-florida-display font-semibold text-florida-green-800">
-                Vintage Style
-              </h3>
-              <p className="text-sm text-florida-green-600">
-                Classic art deco and watercolor aesthetics
-              </p>
-            </div>
-            <div className="text-center space-y-2">
-              <div className="text-2xl">🖼️</div>
-              <h3 className="font-florida-display font-semibold text-florida-green-800">
-                Premium Quality
-              </h3>
-              <p className="text-sm text-florida-green-600">
-                Museum-quality prints on archival paper
-              </p>
-            </div>
           </div>
         </div>
       </div>

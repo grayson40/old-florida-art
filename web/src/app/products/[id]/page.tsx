@@ -89,7 +89,7 @@ export default function ProductPage() {
         <nav className="text-sm mb-8">
           <Link href="/" className="text-florida-green-600 hover:text-florida-green-800">Home</Link>
           <span className="mx-2 text-florida-green-400">/</span>
-          <Link href="/posters" className="text-florida-green-600 hover:text-florida-green-800">Prints</Link>
+                      <Link href="/prints" className="text-florida-green-600 hover:text-florida-green-800">Prints</Link>
           <span className="mx-2 text-florida-green-400">/</span>
           <span className="text-florida-green-800 font-medium">{product.title}</span>
         </nav>

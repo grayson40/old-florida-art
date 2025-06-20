@@ -73,7 +73,7 @@ export function CartSidebar() {
                 onClick={closeCart}
                 asChild
               >
-                <Link href="/posters">
+                <Link href="/prints">
                   Browse Prints
                 </Link>
               </Button>
@@ -175,7 +175,7 @@ export function CartSidebar() {
                 onClick={closeCart}
                 asChild
               >
-                <Link href="/posters">
+                <Link href="/prints">
                   Continue Shopping
                 </Link>
               </Button>
