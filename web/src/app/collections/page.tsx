@@ -6,391 +6,212 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { ArrowRight, Flower, Waves, Palette, Camera, Leaf } from 'lucide-react'
+import { ArrowRight, Flower, Waves, Palette, Camera, Leaf, Package, Star, Frame, Home, Shirt, Filter, Grid, Search } from 'lucide-react'
+import { useCollections, type Collection } from '@/hooks/use-collections'
+import { useState, useMemo } from 'react'
 
-// Mock data for collections
-const collections = [
-  {
-    id: 'tropical-blooms',
-    title: 'Tropical Blooms',
-    subtitle: 'Hibiscus & Florida Flora',
-    description: 'Celebrate Florida\'s vibrant botanical heritage with our hibiscus-inspired collection featuring vintage watercolor florals.',
-    image: 'https://images.unsplash.com/photo-1594736797933-d0b22ba58871?w=600&h=800&fit=crop',
-    productCount: 12,
-    icon: Flower,
-    color: 'flamingo',
-    featured: true,
-    products: [
-      {
-        id: 'hibiscus-classic',
-        title: 'Classic Hibiscus Dreams',
-        style: 'Vintage Watercolor',
-        price: 48,
-        originalPrice: 65,
-        image: 'https://images.unsplash.com/photo-1594736797933-d0b22ba58871?w=400&h=500&fit=crop',
-        isNew: true,
-        isFeatured: true
-      },
-      {
-        id: 'bougainvillea-sunset',
-        title: 'Bougainvillea Sunset',
-        style: 'Art Deco Botanical',
-        price: 45,
-        image: 'https://images.unsplash.com/photo-1615232741321-8bfb1a5ffe26?w=400&h=500&fit=crop',
-        isFeatured: true
-      },
-      {
-        id: 'palm-fronds',
-        title: 'Sacred Palm Fronds',
-        style: 'Minimalist Line Art',
-        price: 42,
-        image: 'https://images.unsplash.com/photo-1566054757965-edebc3e5e82a?w=400&h=500&fit=crop'
-      }
-    ]
-  },
-  {
-    id: 'surf-breaks',
-    title: 'Classic Surf Breaks',
-    subtitle: 'Legendary Florida Waves',
-    description: 'Iconic surf spots from Sebastian Inlet to Cocoa Beach, rendered in classic vintage poster style.',
-    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&h=800&fit=crop',
-    productCount: 15,
-    icon: Waves,
-    color: 'blue',
-    featured: true,
-    products: [
-      {
-        id: 'sebastian-inlet',
-        title: 'Sebastian Inlet Classic',
-        style: 'Vintage Surf Poster',
-        price: 45,
-        originalPrice: 60,
-        image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=500&fit=crop',
-        isNew: true,
-        isFeatured: true
-      },
-      {
-        id: 'cocoa-beach',
-        title: 'Cocoa Beach Legends',
-        style: 'Art Deco',
-        price: 42,
-        image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=500&fit=crop',
-        isFeatured: true
-      }
-    ]
-  },
-  {
-    id: 'art-deco-florida',
-    title: 'Art Deco Florida',
-    subtitle: 'Miami Beach Glamour',
-    description: 'Geometric elegance meets Florida charm in this sophisticated collection inspired by South Beach architecture.',
-    image: 'https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?w=600&h=800&fit=crop',
-    productCount: 8,
-    icon: Palette,
-    color: 'sunset',
-    featured: false,
-    products: [
-      {
-        id: 'deco-skyline',
-        title: 'Miami Deco Skyline',
-        style: 'Art Deco',
-        price: 52,
-        image: 'https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?w=400&h=500&fit=crop'
-      }
-    ]
-  },
-  {
-    id: 'vintage-postcards',
-    title: 'Vintage Postcards',
-    subtitle: 'Greetings from Florida',
-    description: 'Nostalgic postcards capturing the golden age of Florida tourism with authentic vintage charm.',
-    image: 'https://images.unsplash.com/photo-1520637736862-4d197d17c89a?w=600&h=800&fit=crop',
-    productCount: 10,
-    icon: Camera,
-    color: 'sand',
-    featured: false,
-    products: [
-      {
-        id: 'vintage-postcard',
-        title: 'Greetings from Paradise',
-        style: 'Vintage Postcard',
-        price: 38,
-        image: 'https://images.unsplash.com/photo-1520637736862-4d197d17c89a?w=400&h=500&fit=crop'
-      }
-    ]
-  },
-  {
-    id: 'mangrove-mysteries',
-    title: 'Mangrove Mysteries',
-    subtitle: 'Everglades & Coastal Wetlands',
-    description: 'Explore Florida\'s mysterious wetlands through atmospheric artwork celebrating our unique ecosystem.',
-    image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=800&fit=crop',
-    productCount: 6,
-    icon: Leaf,
-    color: 'green',
-    featured: false,
-    products: [
-      {
-        id: 'mangrove-twilight',
-        title: 'Mangrove Twilight',
-        style: 'Atmospheric Watercolor',
-        price: 46,
-        image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=500&fit=crop'
-      }
-    ]
-  }
-]
+const iconMap = {
+  Flower,
+  Waves,
+  Palette,
+  Camera,
+  Leaf,
+  Package,
+  Star,
+  Frame,
+  Home,
+  Shirt
+};
 
-const featuredCollections = collections.filter(c => c.featured)
-const allCollections = collections
+const colorMap = {
+  flamingo: 'bg-gradient-to-br from-pink-500 to-red-400',
+  blue: 'bg-gradient-to-br from-blue-500 to-indigo-400',
+  sunset: 'bg-gradient-to-br from-orange-500 to-pink-400',
+  sand: 'bg-gradient-to-br from-yellow-500 to-orange-400',
+  green: 'bg-gradient-to-br from-green-500 to-emerald-400',
+  gold: 'bg-gradient-to-br from-yellow-500 to-amber-400',
+  purple: 'bg-gradient-to-br from-purple-500 to-indigo-400',
+  pink: 'bg-gradient-to-br from-pink-500 to-purple-400'
+};
 
 export default function CollectionsPage() {
-  return (
-    <div className="min-h-screen">
-      <Navigation />
-      
-      {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Botanical background pattern */}
-        <div className="absolute inset-0 florida-gradient opacity-60" />
-        <div className="absolute inset-0">
-          {/* Hibiscus decorative elements */}
-          <div className="absolute top-20 left-10 opacity-10 rotate-12">
-          <Flower className="w-32 h-32 text-florida-flamingo-300" />
-          </div>
-          <div className="absolute top-40 right-20 opacity-10 -rotate-45">
-            <Flower className="w-32 h-32 text-florida-flamingo-300" />
-          </div>
-          <div className="absolute bottom-20 left-1/4 opacity-10 rotate-45">
-            <Leaf className="w-24 h-24 text-florida-green-300" />
+  const { collections, loading, error, getFeaturedCollections } = useCollections();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'featured' | 'gooten' | 'local'>('all');
+
+  const filteredCollections = useMemo(() => {
+    let filtered = collections;
+
+    // Apply filter
+    if (selectedFilter === 'featured') {
+      filtered = filtered.filter(c => c.featured);
+    } else if (selectedFilter === 'gooten') {
+      filtered = filtered.filter(c => c.vendor === 'gooten');
+    } else if (selectedFilter === 'local') {
+      filtered = filtered.filter(c => c.vendor === 'local');
+    }
+
+    // Apply search
+    if (searchTerm) {
+      filtered = filtered.filter(c => 
+        c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.subtitle.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [collections, searchTerm, selectedFilter]);
+
+  const featuredCollections = getFeaturedCollections();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-florida-sand-50/30">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-64 py-20">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-florida-green-600 mx-auto mb-4"></div>
+            <p className="text-florida-green-600 font-medium">Loading beautiful Florida collections...</p>
           </div>
         </div>
-        
-        <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <div className="space-y-6">
-            <h1 className="font-florida-script text-6xl sm:text-7xl lg:text-8xl text-florida-green-800 drop-shadow-sm">
-              Collections
-            </h1>
-            <h2 className="font-florida-display text-2xl sm:text-3xl lg:text-4xl text-florida-green-700 font-semibold">
-              Curated Florida Experiences
-            </h2>
-            <p className="font-florida-body text-lg sm:text-xl text-florida-green-600 max-w-3xl mx-auto leading-relaxed">
-              Discover our thoughtfully curated collections celebrating Florida&apos;s natural beauty, 
-              from vibrant hibiscus blooms to legendary surf breaks, each telling a unique story 
-              of the Sunshine State&apos;s timeless charm.
-            </p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Collections</h1>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-florida-sand-50">
+      <Navigation />
+      
+      {/* Compact Hero Section */}
+      <section className="relative py-8 px-4 sm:px-6 lg:px-8 bg-white border-b border-florida-sand-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex-1">
+              <h1 className="font-florida-script text-4xl sm:text-5xl text-florida-green-800 mb-2">
+                Our Collections
+              </h1>
+              <p className="text-lg text-florida-green-600 max-w-2xl">
+                Discover curated collections that capture the essence of Florida's beauty, 
+                from tropical blooms to legendary surf breaks.
+              </p>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <div className="flex items-center justify-center w-12 h-12 bg-florida-green-100 rounded-full mb-2">
+                  <Package className="h-6 w-6 text-florida-green-600" />
+                </div>
+                <div className="font-semibold text-florida-green-800">{collections.length}</div>
+                <div className="text-sm text-florida-green-600">Collections</div>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center w-12 h-12 bg-florida-sunset-100 rounded-full mb-2">
+                  <Star className="h-6 w-6 text-florida-sunset-600" />
+                </div>
+                <div className="font-semibold text-florida-green-800">{featuredCollections.length}</div>
+                <div className="text-sm text-florida-green-600">Featured</div>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center w-12 h-12 bg-florida-blue-100 rounded-full mb-2">
+                  <Palette className="h-6 w-6 text-florida-blue-600" />
+                </div>
+                <div className="font-semibold text-florida-green-800">
+                  {collections.reduce((total, col) => total + col.productCount, 0)}
+                </div>
+                <div className="text-sm text-florida-green-600">Products</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Featured Collections */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="font-florida-script text-4xl sm:text-5xl text-florida-green-800 mb-4">
-              Featured Collections
-            </h2>
-            <p className="font-florida-body text-lg text-florida-green-600 max-w-2xl mx-auto">
-              Our most beloved collections, featuring the essence of Old Florida&apos;s 
-              botanical beauty and coastal heritage.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-            {featuredCollections.map((collection) => {
-              const IconComponent = collection.icon
-              const colorClasses = {
-                flamingo: 'bg-florida-flamingo-50 border-florida-flamingo-200 text-florida-flamingo-800',
-                blue: 'bg-florida-blue-50 border-florida-blue-200 text-florida-blue-800',
-                sunset: 'bg-florida-sunset-50 border-florida-sunset-200 text-florida-sunset-800',
-                green: 'bg-florida-green-50 border-florida-green-200 text-florida-green-800',
-                sand: 'bg-florida-sand-50 border-florida-sand-200 text-florida-sand-800'
-              }
-
-              return (
-                <Card key={collection.id} className="group hover:shadow-xl transition-all duration-500 overflow-hidden border-0 bg-gradient-to-br from-white to-florida-sand-50/30">
-                  <div className="relative">
-                    <div className="aspect-[16/10] overflow-hidden">
-                      <img
-                        src={collection.image}
-                        alt={collection.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                    </div>
-                    
-                    {/* Collection info overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                      <div className="flex items-center mb-3">
-                        <div className={`p-2 rounded-full ${colorClasses[collection.color as keyof typeof colorClasses]} bg-white/90 mr-3`}>
-                          <IconComponent className="h-5 w-5" />
-                        </div>
-                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                          {collection.productCount} pieces
-                        </Badge>
-                      </div>
-                      <h3 className="font-florida-script text-3xl mb-2">
-                        {collection.title}
-                      </h3>
-                      <p className="font-florida-display text-lg text-white/90 mb-1">
-                        {collection.subtitle}
-                      </p>
-                      <p className="text-white/80 text-sm mb-4 line-clamp-2">
-                        {collection.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  <CardContent className="p-6">
-                    {/* Sample products */}
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      {collection.products.slice(0, 3).map((product) => (
-                        <div key={product.id} className="group/product">
-                          <div className="aspect-[3/4] rounded-lg overflow-hidden">
-                            <img
-                              src={product.image}
-                              alt={product.title}
-                              className="w-full h-full object-cover group-hover/product:scale-105 transition-transform duration-300"
-                            />
-                          </div>
-                          <div className="mt-2">
-                            <h4 className="text-xs font-medium text-florida-green-800 line-clamp-1">
-                              {product.title}
-                            </h4>
-                            <p className="text-xs text-florida-green-600">${product.price}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <Button asChild variant="florida" className="w-full">
-                      <Link href={`/collections/${collection.id}`} className="flex items-center justify-center space-x-2">
-                        <span>Explore Collection</span>
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* All Collections Grid */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-florida-sand-50/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="font-florida-script text-4xl sm:text-5xl text-florida-green-800 mb-4">
-              All Collections
-            </h2>
-            <p className="font-florida-body text-lg text-florida-green-600 max-w-2xl mx-auto">
-              Browse our complete collection of Florida-inspired artwork, 
-              each series celebrating a different aspect of our coastal paradise.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {allCollections.map((collection) => {
-              const IconComponent = collection.icon
-              const colorClasses = {
-                flamingo: 'bg-florida-flamingo-500 text-white',
-                blue: 'bg-florida-blue-500 text-white',
-                sunset: 'bg-florida-sunset-500 text-white',
-                green: 'bg-florida-green-500 text-white',
-                sand: 'bg-florida-sand-500 text-white'
-              }
-
-              return (
-                <Card key={collection.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden border-0 bg-white">
-                  <div className="relative">
-                    <div className="aspect-[4/3] overflow-hidden">
-                      <img
-                        src={collection.image}
-                        alt={collection.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    </div>
-                    
-                    <div className="absolute top-4 left-4">
-                      <div className={`p-2 rounded-full ${colorClasses[collection.color as keyof typeof colorClasses]}`}>
-                        <IconComponent className="h-4 w-4" />
-                      </div>
-                    </div>
-
-                    <div className="absolute bottom-4 left-4 right-4 text-white">
-                      <h3 className="font-florida-display text-xl font-semibold mb-1">
-                        {collection.title}
-                      </h3>
-                      <p className="text-white/90 text-sm">
-                        {collection.subtitle}
-                      </p>
-                    </div>
-                  </div>
-
-                  <CardContent className="p-6">
-                    <p className="text-florida-green-600 text-sm mb-4 line-clamp-2">
-                      {collection.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="border-florida-green-300 text-florida-green-700">
-                        {collection.productCount} prints
-                      </Badge>
-                      <Button asChild variant="outline" size="sm" className="border-florida-green-300 text-florida-green-700 hover:bg-florida-green-50">
-                        <Link href={`/collections/${collection.id}`}>
-                          View
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="relative">
-            {/* Decorative hibiscus elements */}
-            <div className="absolute -top-8 left-1/4 opacity-20">
-              <Flower className="w-16 h-16 text-florida-flamingo-400 rotate-12" />
-            </div>
-            <div className="absolute -bottom-8 right-1/4 opacity-20">
-              <Flower className="w-12 h-12 text-florida-flamingo-400 -rotate-12" />
-            </div>
-            
-            <Card className="bg-gradient-to-br from-florida-sand-50 to-florida-green-50/30 border-florida-sand-200">
-              <CardContent className="p-12">
-                <h2 className="font-florida-script text-4xl sm:text-5xl text-florida-green-800 mb-6">
-                  Create Your Gallery
+      {featuredCollections.length > 0 && selectedFilter === 'all' && (
+        <section className="py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="font-florida-display text-2xl lg:text-3xl font-bold text-florida-green-800 mb-2">
+                  Featured Collections
                 </h2>
-                <p className="font-florida-body text-lg text-florida-green-600 mb-8 max-w-2xl mx-auto">
-                  Mix and match pieces from different collections to create your perfect 
-                  Florida-inspired gallery wall. Each print tells a story of our beautiful state.
+                <p className="font-florida-body text-florida-green-600">
+                  Our most popular and carefully curated collections
                 </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <Button asChild variant="florida" size="lg" className="text-lg px-8">
-                    <Link href="/prints" className="flex items-center space-x-2">
-                      <span>Shop All Prints</span>
-                      <ArrowRight className="h-5 w-5" />
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg" className="border-florida-green-300 text-florida-green-700 hover:bg-florida-green-50 text-lg px-8">
-                    <Link href="/gallery-guide">
-                      Gallery Guide
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+              <Badge variant="secondary" className="bg-florida-sunset-100 text-florida-sunset-700">
+                {featuredCollections.length} Featured
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {featuredCollections.slice(0, 2).map((collection) => (
+                <FeaturedCollectionCard key={collection.id} collection={collection} />
+              ))}
+            </div>
+
+            {featuredCollections.length > 2 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredCollections.slice(2).map((collection) => (
+                  <CollectionCard key={collection.id} collection={collection} />
+                ))}
+              </div>
+            )}
           </div>
+        </section>
+      )}
+
+      {/* All Collections */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="font-florida-display text-2xl lg:text-3xl font-bold text-florida-green-800">
+              {selectedFilter === 'all' ? 'All Collections' : 
+               selectedFilter === 'featured' ? 'Featured Collections' :
+               selectedFilter === 'local' ? 'Curated Collections' : 'Print-on-Demand Collections'}
+            </h2>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Grid className="h-4 w-4" />
+              <span>{filteredCollections.length} collections</span>
+            </div>
+          </div>
+
+          {filteredCollections.length === 0 ? (
+            <div className="text-center py-12">
+              <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">No collections found</h3>
+              <p className="text-gray-500">Try adjusting your search or filters</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredCollections.map((collection) => (
+                <CollectionCard key={collection.id} collection={collection} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
+
 
       {/* Footer */}
       <footer className="bg-florida-green-800 text-florida-green-50 py-12">
@@ -399,23 +220,34 @@ export default function CollectionsPage() {
             <div className="space-y-4">
               <h3 className="font-florida-script text-2xl">Old Florida</h3>
               <p className="text-sm text-florida-green-200">
-                Celebrating Florida&apos;s heritage through vintage-inspired art.
+                Celebrating Florida's heritage through vintage-inspired art that 
+                brings the beauty of the Sunshine State to your home.
               </p>
+              <div className="flex space-x-4">
+                <Badge variant="outline" className="text-xs text-florida-green-200 border-florida-green-600">
+                  Made in Florida
+                </Badge>
+                <Badge variant="outline" className="text-xs text-florida-green-200 border-florida-green-600">
+                  Premium Quality
+                </Badge>
+              </div>
             </div>
             <div className="space-y-4">
               <h4 className="font-florida-display font-semibold">Shop</h4>
               <div className="space-y-2 text-sm">
-                <div><Link href="/prints" className="text-florida-green-200 hover:text-white">All Prints</Link></div>
-                <div><Link href="/collections" className="text-florida-green-200 hover:text-white">Collections</Link></div>
-                <div><Link href="/new" className="text-florida-green-200 hover:text-white">New Arrivals</Link></div>
+                <div><Link href="/prints" className="text-florida-green-200 hover:text-white transition-colors">All Prints</Link></div>
+                <div><Link href="/collections" className="text-florida-green-200 hover:text-white transition-colors">Collections</Link></div>
+                <div><Link href="/prints?category=bestsellers" className="text-florida-green-200 hover:text-white transition-colors">Best Sellers</Link></div>
+                <div><Link href="/prints?filter=new" className="text-florida-green-200 hover:text-white transition-colors">New Arrivals</Link></div>
               </div>
             </div>
             <div className="space-y-4">
-              <h4 className="font-florida-display font-semibold">Collections</h4>
+              <h4 className="font-florida-display font-semibold">Learn</h4>
               <div className="space-y-2 text-sm">
-                <div><Link href="/collections/tropical-blooms" className="text-florida-green-200 hover:text-white">Tropical Blooms</Link></div>
-                <div><Link href="/collections/surf-breaks" className="text-florida-green-200 hover:text-white">Surf Breaks</Link></div>
-                <div><Link href="/collections/art-deco-florida" className="text-florida-green-200 hover:text-white">Art Deco</Link></div>
+                <div><Link href="/about" className="text-florida-green-200 hover:text-white transition-colors">Our Story</Link></div>
+                <div><Link href="/collections" className="text-florida-green-200 hover:text-white transition-colors">Art Collections</Link></div>
+                <div><span className="text-florida-green-200">Print Care Guide</span></div>
+                <div><span className="text-florida-green-200">Size Guide</span></div>
               </div>
             </div>
             <div className="space-y-4">
@@ -424,14 +256,121 @@ export default function CollectionsPage() {
                 <div className="text-florida-green-200">hello@oldflorida.com</div>
                 <div className="text-florida-green-200">(321) 555-ARTS</div>
                 <div className="text-florida-green-200">Florida, USA</div>
+                <div className="flex items-center space-x-2 text-florida-green-200">
+                  <Star className="h-4 w-4 fill-current" />
+                  <span>4.9/5 Customer Rating</span>
+                </div>
               </div>
             </div>
           </div>
           <div className="border-t border-florida-green-700 mt-8 pt-8 text-center text-sm text-florida-green-200">
-            <p>&copy; 2024 Old Florida Art Co. Celebrating the Sunshine State&apos;s timeless beauty.</p>
+            <p>&copy; 2024 Old Florida Art Co. All rights reserved. Made with ❤️ in the Sunshine State.</p>
           </div>
         </div>
       </footer>
     </div>
   )
+}
+
+function FeaturedCollectionCard({ collection }: { collection: Collection }) {
+  const IconComponent = iconMap[collection.icon as keyof typeof iconMap] || Package;
+  const colorClass = colorMap[collection.color as keyof typeof colorMap] || colorMap.blue;
+
+  return (
+    <Link href={`/collections/${collection.id}`}>
+      <Card className="group relative overflow-hidden h-80 cursor-pointer hover:shadow-xl transition-all duration-300 border-florida-sand-200">
+        <div className="absolute inset-0">
+          <img
+            src={collection.image}
+            alt={collection.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/60" />
+        </div>
+        
+        <div className="relative z-10 h-full flex flex-col justify-between p-6 text-white">
+          <div className="flex items-start justify-between">
+            <div className={`p-3 rounded-lg ${colorClass} backdrop-blur-sm`}>
+              <IconComponent className="h-6 w-6 text-white" />
+            </div>
+            {collection.featured && (
+              <Badge className="bg-yellow-500 text-yellow-900 border-yellow-400">
+                Featured
+              </Badge>
+            )}
+          </div>
+          
+          <div className="space-y-3">
+            <div>
+              <h3 className="font-florida-display text-2xl font-bold mb-1">
+                {collection.title}
+              </h3>
+              <p className="font-florida-body text-lg opacity-90">
+                {collection.subtitle}
+              </p>
+            </div>
+            <p className="font-florida-body text-sm opacity-80 line-clamp-2">
+              {collection.description}
+            </p>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">
+                {collection.productCount} items
+              </span>
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+        </div>
+      </Card>
+    </Link>
+  );
+}
+
+function CollectionCard({ collection }: { collection: Collection }) {
+  const IconComponent = iconMap[collection.icon as keyof typeof iconMap] || Package;
+  const colorClass = colorMap[collection.color as keyof typeof colorMap] || colorMap.blue;
+
+  return (
+    <Link href={`/collections/${collection.id}`}>
+      <Card className="group relative overflow-hidden h-64 cursor-pointer hover:shadow-lg transition-all duration-300 border-florida-sand-200">
+        <div className="absolute inset-0">
+          <img
+            src={collection.image}
+            alt={collection.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        </div>
+        
+        <div className="relative z-10 h-full flex flex-col justify-between p-4 text-white">
+          <div className="flex items-start justify-between">
+            <div className={`p-2 rounded-lg ${colorClass} backdrop-blur-sm`}>
+              <IconComponent className="h-4 w-4 text-white" />
+            </div>
+            {collection.featured && (
+              <Badge className="bg-yellow-500 text-yellow-900 border-yellow-400 text-xs">
+                Featured
+              </Badge>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <div>
+              <h3 className="font-florida-display text-lg font-bold mb-1">
+                {collection.title}
+              </h3>
+              <p className="font-florida-body text-sm opacity-90">
+                {collection.subtitle}
+              </p>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium">
+                {collection.productCount} items
+              </span>
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+        </div>
+      </Card>
+    </Link>
+  );
 } 

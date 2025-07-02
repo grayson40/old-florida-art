@@ -1,143 +1,238 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Navigation } from '@/components/navigation'
-import { ProductCard } from '@/components/product-card'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ShoppingCart, Heart, Share2, Minus, Plus } from 'lucide-react'
+import { 
+  ArrowLeft,
+  Heart,
+  Share2,
+  Star,
+  Truck,
+  Shield,
+  RotateCcw,
+  Plus,
+  Minus,
+  Check,
+  AlertCircle,
+  Package,
+  Palette,
+  Ruler,
+  Zap
+} from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
+import { useGootenProducts } from '@/hooks/use-gooten-products'
+import { ProductCard } from '@/components/product-card'
 
-// Mock product data - would typically come from API/database
-const product = {
-  id: '1',
-  title: 'Sebastian Inlet Classic',
-  style: 'Vintage Watercolor',
-  price: 45,
-  originalPrice: 60,
-  images: [
-    'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1520637836862-4d197d17c89a?w=800&h=1000&fit=crop',
-  ],
-  isNew: true,
-  isFeatured: true,
-  description: 'Our Sebastian Inlet Classic captures the timeless beauty of Florida\'s most iconic coastline. This vintage watercolor piece brings the laid-back spirit of old Florida into your space with its soft, dreamy palette and nostalgic charm.',
-  details: [
-    'Premium archival paper',
-    'Fade-resistant inks',
-    'Made in Florida',
-    'Ships within 2-3 business days'
-  ],
-  sizes: ['12" x 16"', '16" x 20"', '18" x 24"', '24" x 32"'],
-  frames: ['Unframed', 'Black Frame', 'White Frame', 'Natural Wood']
-}
-
-// Related products
-const relatedProducts = [
-  {
-    id: '2',
-    title: 'Cocoa Beach Legends',
-    style: 'Art Deco',
-    price: 42,
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=500&fit=crop',
-    isFeatured: true
-  },
-  {
-    id: '3',
-    title: 'Space Coast Vintage',
-    style: 'Minimalist Line Art',
-    price: 38,
-    image: 'https://images.unsplash.com/photo-1520637836862-4d197d17c89a?w=400&h=500&fit=crop'
-  }
+const PRODUCT_SIZES = [
+  { name: '8x10', price: 0, popular: false },
+  { name: '11x14', price: 5, popular: true },
+  { name: '16x20', price: 15, popular: false },
+  { name: '18x24', price: 25, popular: false },
+  { name: '24x36', price: 45, popular: false }
 ]
 
-export default function ProductPage() {
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [selectedSize, setSelectedSize] = useState('')
-  const [selectedFrame, setSelectedFrame] = useState('')
-  const [quantity, setQuantity] = useState(1)
+const FRAME_OPTIONS = [
+  { name: 'No Frame', price: 0, description: 'Print only' },
+  { name: 'Black Frame', price: 25, description: 'Classic black wooden frame' },
+  { name: 'White Frame', price: 25, description: 'Clean white wooden frame' },
+  { name: 'Natural Wood', price: 30, description: 'Natural oak frame' }
+]
+
+export default function ProductDetailPage() {
+  const params = useParams()
+  const router = useRouter()
   const { dispatch } = useCart()
+  const { products, loading } = useGootenProducts()
+  
+  const [selectedSize, setSelectedSize] = useState(PRODUCT_SIZES[1]) // Default to 11x14
+  const [selectedFrame, setSelectedFrame] = useState(FRAME_OPTIONS[0]) // Default to no frame
+  const [quantity, setQuantity] = useState(1)
+  const [isLiked, setIsLiked] = useState(false)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
+
+  // Find the product by ID
+  const product = products.find(p => p.id === params.id)
+
+  // Get related products from the same collection
+  const relatedProducts = product ? products.filter(p => 
+    p.collection === product.collection && 
+    p.id !== product.id
+  ).slice(0, 4) : []
+
+  // Mock additional product data for demonstration
+  const productDetails = {
+    description: `Experience the timeless beauty of Florida with this stunning ${product?.style || 'print'}. Carefully crafted to capture the essence of the Sunshine State, this piece brings authentic Florida charm to any space.`,
+    features: [
+      'Museum-quality archival paper',
+      'Fade-resistant inks',
+      'Multiple size options available',
+      'Ready to frame or hang'
+    ],
+    materials: 'Premium matte finish on archival paper',
+    dimensions: 'Available in multiple sizes',
+    care: 'Keep away from direct sunlight. Dust gently with soft, dry cloth.',
+    shipping: 'Ships within 3-5 business days',
+    returns: '30-day return policy'
+  }
+
+  // Multiple product images for gallery
+  const productImages = product ? [
+    product.image,
+    // Generate variations of the same image for demo
+    product.image.replace('w=400', 'w=500'),
+    product.image.replace('h=500', 'h=600'),
+    product.image.replace('fit=crop', 'fit=fill&bg=white')
+  ] : []
+
+  // Calculate total price
+  const basePrice = product?.price || 25
+  const totalPrice = basePrice + selectedSize.price + selectedFrame.price
 
   const handleAddToCart = () => {
-    if (selectedSize && selectedFrame) {
-      dispatch({
-        type: 'ADD_ITEM',
-        payload: {
-          id: product.id,
-          title: product.title,
-          style: product.style,
-          price: product.price,
-          originalPrice: product.originalPrice,
-          image: product.images[0],
-          size: selectedSize,
-          frame: selectedFrame,
-          quantity
-        }
-      })
+    if (!product) return
+
+    const cartItem = {
+      id: `${product.id}-${selectedSize.name}-${selectedFrame.name}`,
+      productId: product.id,
+      title: product.title,
+      style: product.style,
+      price: totalPrice,
+      image: product.image,
+      quantity,
+      size: selectedSize.name,
+      frame: selectedFrame.name,
+      vendor: 'gooten'
+    }
+
+    dispatch({ type: 'ADD_ITEM', payload: cartItem })
+    
+    // Show success feedback (you could add a toast here)
+    console.log('Added to cart:', cartItem)
+  }
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product?.title,
+          text: `Check out this beautiful Florida art: ${product?.title}`,
+          url: window.location.href,
+        })
+      } catch (err) {
+        console.log('Error sharing:', err)
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href)
+      alert('Link copied to clipboard!')
     }
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-florida-green-600 mx-auto mb-4"></div>
+            <p className="text-florida-green-600">Loading product...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-64">
+          <div className="text-center max-w-md">
+            <AlertCircle className="h-16 w-16 text-florida-green-400 mx-auto mb-4" />
+            <h2 className="font-florida-display text-2xl text-florida-green-800 mb-4">
+              Product Not Found
+            </h2>
+            <p className="text-florida-green-600 mb-8">
+              The product you're looking for doesn't exist or has been removed.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button onClick={() => router.back()} variant="outline">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Go Back
+              </Button>
+              <Button asChild variant="florida">
+                <Link href="/prints">Browse All Products</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-florida-sand-50/30">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <nav className="text-sm mb-8">
-          <Link href="/" className="text-florida-green-600 hover:text-florida-green-800">Home</Link>
-          <span className="mx-2 text-florida-green-400">/</span>
-                      <Link href="/prints" className="text-florida-green-600 hover:text-florida-green-800">Prints</Link>
-          <span className="mx-2 text-florida-green-400">/</span>
-          <span className="text-florida-green-800 font-medium">{product.title}</span>
-        </nav>
+      {/* Breadcrumb */}
+      <div className="bg-white border-b border-florida-sand-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center space-x-2 text-sm">
+            <Link href="/" className="text-florida-green-600 hover:text-florida-green-800">
+              Home
+            </Link>
+            <span className="text-florida-green-400">/</span>
+            <Link href="/prints" className="text-florida-green-600 hover:text-florida-green-800">
+              Prints
+            </Link>
+            <span className="text-florida-green-400">/</span>
+            <span className="text-florida-green-800 font-medium truncate">
+              {product.title}
+            </span>
+          </div>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="aspect-[4/5] relative overflow-hidden rounded-lg bg-florida-sand-50">
+            {/* Main Image */}
+            <div className="aspect-[3/4] bg-florida-sand-100 rounded-2xl overflow-hidden">
               <Image
-                src={product.images[selectedImage]}
+                src={productImages[activeImageIndex] || product.image}
                 alt={product.title}
-                fill
-                className="object-cover"
-                priority
+                width={600}
+                height={800}
+                className="w-full h-full object-cover"
               />
-              
-              {/* Badges */}
-              <div className="absolute top-4 left-4 flex flex-col gap-2">
-                {product.isNew && (
-                  <Badge className="bg-black text-white text-xs px-2 py-1">
-                    NEW
-                  </Badge>
-                )}
-                {product.isFeatured && (
-                  <Badge className="bg-florida-sunset-500 text-white text-xs px-2 py-1">
-                    FEATURED
-                  </Badge>
-                )}
-              </div>
             </div>
             
-            {/* Thumbnail images */}
-            <div className="flex space-x-2">
-              {product.images.map((image, index) => (
+            {/* Image Thumbnails */}
+            <div className="grid grid-cols-4 gap-3">
+              {productImages.slice(0, 4).map((image, index) => (
                 <button
                   key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`aspect-square w-20 relative overflow-hidden rounded-md ${
-                    selectedImage === index 
-                      ? 'ring-2 ring-florida-green-500' 
-                      : 'ring-1 ring-florida-sand-300'
+                  onClick={() => setActiveImageIndex(index)}
+                  className={`aspect-square bg-florida-sand-100 rounded-lg overflow-hidden border-2 transition-colors ${
+                    index === activeImageIndex 
+                      ? 'border-florida-green-400' 
+                      : 'border-florida-sand-200 hover:border-florida-green-300'
                   }`}
                 >
                   <Image
                     src={image}
-                    alt={`${product.title} ${index + 1}`}
-                    fill
-                    className="object-cover"
+                    alt={`${product.title} view ${index + 1}`}
+                    width={150}
+                    height={150}
+                    className="w-full h-full object-cover"
                   />
                 </button>
               ))}
@@ -146,152 +241,357 @@ export default function ProductPage() {
 
           {/* Product Info */}
           <div className="space-y-6">
+            
+            {/* Header */}
             <div>
-              <h1 className="text-3xl font-florida-display font-medium text-florida-green-800 mb-2">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  {product.isNew && (
+                    <Badge className="bg-florida-flamingo-100 text-florida-flamingo-700 border-florida-flamingo-200">
+                      New
+                    </Badge>
+                  )}
+                  {product.isFeatured && (
+                    <Badge className="bg-florida-blue-100 text-florida-blue-700 border-florida-blue-200">
+                      Featured
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className="text-florida-green-600">
+                    {product.collection}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setIsLiked(!isLiked)}
+                  >
+                    <Heart className={`h-5 w-5 ${isLiked ? 'fill-current text-florida-flamingo-500' : 'text-florida-green-600'}`} />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={handleShare}>
+                    <Share2 className="h-5 w-5 text-florida-green-600" />
+                  </Button>
+                </div>
+              </div>
+              
+              <h1 className="font-florida-script text-4xl sm:text-5xl text-florida-green-800 mb-3">
                 {product.title}
               </h1>
-              <p className="text-lg text-florida-green-600 font-medium uppercase tracking-wide">
+              
+              <p className="text-lg text-florida-green-600 font-medium mb-4">
                 {product.style}
               </p>
-            </div>
-
-            {/* Price */}
-            <div className="flex items-center space-x-3">
-              <span className="text-3xl font-semibold text-florida-green-800 font-florida-display">
-                ${product.price}
-              </span>
-              {product.originalPrice && (
-                <span className="text-xl text-florida-green-500 line-through">
-                  ${product.originalPrice}
+              
+              <div className="flex items-center space-x-4 mb-4">
+                <div className="flex items-center space-x-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-current text-florida-sunset-400" />
+                  ))}
+                  <span className="text-sm text-florida-green-600 ml-2">4.9 (127 reviews)</span>
+                </div>
+              </div>
+              
+              <div className="flex items-baseline space-x-3">
+                <span className="text-4xl font-bold font-florida-display text-florida-green-800">
+                  ${totalPrice}
                 </span>
-              )}
+                {product.originalPrice && (
+                  <span className="text-xl text-florida-green-500 line-through">
+                    ${product.originalPrice + selectedSize.price + selectedFrame.price}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Size Selection */}
-            <div className="space-y-3">
-              <h3 className="font-medium text-florida-green-800">
-                Size {!selectedSize && <span className="text-florida-flamingo-500">*</span>}
+            <div>
+              <h3 className="font-florida-display text-lg font-semibold text-florida-green-800 mb-3 flex items-center">
+                <Ruler className="h-5 w-5 mr-2" />
+                Size
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size) => (
+              <div className="grid grid-cols-3 gap-3">
+                {PRODUCT_SIZES.map((size) => (
                   <button
-                    key={size}
+                    key={size.name}
                     onClick={() => setSelectedSize(size)}
-                    className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
-                      selectedSize === size
-                        ? 'border-florida-green-500 bg-florida-green-500 text-white'
-                        : 'border-florida-sand-300 text-florida-green-700 hover:border-florida-green-300'
+                    className={`relative p-3 text-center border-2 rounded-lg transition-colors ${
+                      selectedSize.name === size.name
+                        ? 'border-florida-green-400 bg-florida-green-50'
+                        : 'border-florida-sand-300 hover:border-florida-green-300'
                     }`}
                   >
-                    {size}
+                    <div className="font-medium text-florida-green-800">{size.name}"</div>
+                    <div className="text-sm text-florida-green-600">
+                      {size.price > 0 ? `+$${size.price}` : 'Base price'}
+                    </div>
+                    {size.popular && (
+                      <Badge className="absolute -top-2 -right-2 bg-florida-sunset-400 text-white text-xs px-2 py-1">
+                        Popular
+                      </Badge>
+                    )}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Frame Selection */}
-            <div className="space-y-3">
-              <h3 className="font-medium text-florida-green-800">
-                Frame {!selectedFrame && <span className="text-florida-flamingo-500">*</span>}
+            <div>
+              <h3 className="font-florida-display text-lg font-semibold text-florida-green-800 mb-3 flex items-center">
+                <Palette className="h-5 w-5 mr-2" />
+                Frame Options
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {product.frames.map((frame) => (
+              <div className="space-y-3">
+                {FRAME_OPTIONS.map((frame) => (
                   <button
-                    key={frame}
+                    key={frame.name}
                     onClick={() => setSelectedFrame(frame)}
-                    className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
-                      selectedFrame === frame
-                        ? 'border-florida-green-500 bg-florida-green-500 text-white'
-                        : 'border-florida-sand-300 text-florida-green-700 hover:border-florida-green-300'
+                    className={`w-full p-4 text-left border-2 rounded-lg transition-colors ${
+                      selectedFrame.name === frame.name
+                        ? 'border-florida-green-400 bg-florida-green-50'
+                        : 'border-florida-sand-300 hover:border-florida-green-300'
                     }`}
                   >
-                    {frame}
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium text-florida-green-800">{frame.name}</div>
+                        <div className="text-sm text-florida-green-600">{frame.description}</div>
+                      </div>
+                      <div className="text-florida-green-800 font-semibold">
+                        {frame.price > 0 ? `+$${frame.price}` : 'Included'}
+                      </div>
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Quantity */}
-            <div className="space-y-3">
-              <h3 className="font-medium text-florida-green-800">Quantity</h3>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-2 border border-florida-sand-300 rounded-md hover:border-florida-green-300 transition-colors"
-                >
-                  <Minus className="h-4 w-4 text-florida-green-700" />
-                </button>
-                <span className="w-12 text-center font-medium text-florida-green-800">
-                  {quantity}
+            <div>
+              <h3 className="font-florida-display text-lg font-semibold text-florida-green-800 mb-3">
+                Quantity
+              </h3>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center border border-florida-sand-300 rounded-lg">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-2 hover:bg-florida-sand-100 transition-colors"
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="px-4 py-2 font-medium min-w-[3rem] text-center">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-2 hover:bg-florida-sand-100 transition-colors"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+                <span className="text-sm text-florida-green-600">
+                  Total: ${(totalPrice * quantity).toFixed(2)}
                 </span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="p-2 border border-florida-sand-300 rounded-md hover:border-florida-green-300 transition-colors"
-                >
-                  <Plus className="h-4 w-4 text-florida-green-700" />
-                </button>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="space-y-4 pt-4">
-              <Button
-                variant="florida"
-                size="lg"
-                className="w-full text-lg py-6"
-                disabled={!selectedSize || !selectedFrame}
+            {/* Add to Cart */}
+            <div className="space-y-4">
+              <Button 
                 onClick={handleAddToCart}
+                className="w-full bg-florida-green-600 hover:bg-florida-green-700 text-white py-4 text-lg font-semibold rounded-xl"
+                size="lg"
               >
-                <ShoppingCart className="h-5 w-5 mr-3" />
-                Add to Cart - ${(product.price * quantity).toFixed(2)}
+                <Package className="h-5 w-5 mr-2" />
+                Add to Cart - ${(totalPrice * quantity).toFixed(2)}
               </Button>
               
-              <div className="flex space-x-3">
-                <Button variant="outline" size="lg" className="flex-1 border-florida-sand-300">
-                  <Heart className="h-5 w-5 mr-2" />
-                  Save
-                </Button>
-                <Button variant="outline" size="lg" className="flex-1 border-florida-sand-300">
-                  <Share2 className="h-5 w-5 mr-2" />
-                  Share
-                </Button>
+              <div className="grid grid-cols-3 gap-4 text-center text-sm text-florida-green-600">
+                <div className="flex flex-col items-center space-y-1">
+                  <Truck className="h-5 w-5" />
+                  <span>Free shipping over $50</span>
+                </div>
+                <div className="flex flex-col items-center space-y-1">
+                  <Shield className="h-5 w-5" />
+                  <span>Satisfaction guaranteed</span>
+                </div>
+                <div className="flex flex-col items-center space-y-1">
+                  <RotateCcw className="h-5 w-5" />
+                  <span>30-day returns</span>
+                </div>
               </div>
             </div>
 
             {/* Product Details */}
-            <div className="border-t border-florida-sand-200 pt-6">
-              <h3 className="font-florida-display font-semibold text-lg text-florida-green-800 mb-4">
-                About This Print
-              </h3>
-              <p className="text-florida-green-700 leading-relaxed mb-6">
-                {product.description}
-              </p>
-              
-              <h4 className="font-medium text-florida-green-800 mb-3">Details</h4>
-              <ul className="space-y-2">
-                {product.details.map((detail, index) => (
-                  <li key={index} className="flex items-center text-florida-green-700">
-                    <div className="w-1.5 h-1.5 bg-florida-green-500 rounded-full mr-3"></div>
-                    {detail}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-florida-display text-florida-green-800">
+                  Product Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-florida-green-700 leading-relaxed">
+                  {productDetails.description}
+                </p>
+                
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="font-semibold text-florida-green-800 mb-1">Features:</h4>
+                    <ul className="text-sm text-florida-green-600 space-y-1">
+                      {productDetails.features.map((feature, index) => (
+                        <li key={index} className="flex items-center space-x-2">
+                          <Check className="h-4 w-4 text-florida-green-500" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <h4 className="font-semibold text-florida-green-800 mb-1">Materials:</h4>
+                      <p className="text-florida-green-600">{productDetails.materials}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-florida-green-800 mb-1">Care Instructions:</h4>
+                      <p className="text-florida-green-600">{productDetails.care}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-florida-green-800 mb-1">Shipping:</h4>
+                      <p className="text-florida-green-600">{productDetails.shipping}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-florida-green-800 mb-1">Returns:</h4>
+                      <p className="text-florida-green-600">{productDetails.returns}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        {/* Related Products */}
-        <section className="mt-20 border-t border-florida-sand-200 pt-16">
-          <h2 className="font-florida-display text-2xl font-semibold text-florida-green-800 mb-8">
-            Pairs Well With
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {relatedProducts.map((relatedProduct) => (
-              <ProductCard key={relatedProduct.id} {...relatedProduct} />
-            ))}
+        {/* Related Products Section */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-16 pt-8 border-t border-florida-sand-200">
+            <div className="text-center mb-8">
+              <h2 className="font-florida-script text-3xl text-florida-green-800 mb-4">
+                You Might Also Like
+              </h2>
+              <p className="text-florida-green-600">
+                More from the {product.collection} collection
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {relatedProducts.map((relatedProduct) => (
+                <ProductCard
+                  key={relatedProduct.id}
+                  id={relatedProduct.id}
+                  title={relatedProduct.title}
+                  style={relatedProduct.style}
+                  price={relatedProduct.price}
+                  originalPrice={relatedProduct.originalPrice}
+                  image={relatedProduct.image}
+                  isNew={relatedProduct.isNew}
+                  isFeatured={relatedProduct.isFeatured}
+                />
+              ))}
+            </div>
+            
+            <div className="flex justify-center">
+              <Button asChild variant="outline" size="lg">
+                <Link href={`/prints?collection=${encodeURIComponent(product.collection)}`} className="flex items-center space-x-2">
+                  <Package className="h-5 w-5" />
+                  <span>View All {product.collection}</span>
+                  <Zap className="h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
           </div>
-        </section>
+        )}
+        
+        {/* Fallback if no related products */}
+        {relatedProducts.length === 0 && (
+          <div className="mt-16 pt-8 border-t border-florida-sand-200">
+            <div className="text-center mb-8">
+              <h2 className="font-florida-script text-3xl text-florida-green-800 mb-4">
+                Explore More Prints
+              </h2>
+              <p className="text-florida-green-600">
+                Discover more beautiful Florida art from our collection
+              </p>
+            </div>
+            
+            <div className="flex justify-center">
+              <Button asChild variant="outline" size="lg">
+                <Link href="/prints" className="flex items-center space-x-2">
+                  <Package className="h-5 w-5" />
+                  <span>Browse All Prints</span>
+                  <Zap className="h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Footer */}
+      <footer className="bg-florida-green-800 text-florida-green-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <h3 className="font-florida-script text-2xl">Old Florida</h3>
+              <p className="text-sm text-florida-green-200">
+                Celebrating Florida's heritage through vintage-inspired art that 
+                brings the beauty of the Sunshine State to your home.
+              </p>
+              <div className="flex space-x-4">
+                <Badge variant="outline" className="text-xs text-florida-green-200 border-florida-green-600">
+                  Made in Florida
+                </Badge>
+                <Badge variant="outline" className="text-xs text-florida-green-200 border-florida-green-600">
+                  Premium Quality
+                </Badge>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-florida-display font-semibold">Shop</h4>
+              <div className="space-y-2 text-sm">
+                <div><Link href="/prints" className="text-florida-green-200 hover:text-white transition-colors">All Prints</Link></div>
+                <div><Link href="/collections" className="text-florida-green-200 hover:text-white transition-colors">Collections</Link></div>
+                <div><Link href="/prints?category=bestsellers" className="text-florida-green-200 hover:text-white transition-colors">Best Sellers</Link></div>
+                <div><Link href="/prints?filter=new" className="text-florida-green-200 hover:text-white transition-colors">New Arrivals</Link></div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-florida-display font-semibold">Learn</h4>
+              <div className="space-y-2 text-sm">
+                <div><Link href="/about" className="text-florida-green-200 hover:text-white transition-colors">Our Story</Link></div>
+                <div><Link href="/collections" className="text-florida-green-200 hover:text-white transition-colors">Art Collections</Link></div>
+                <div><span className="text-florida-green-200">Print Care Guide</span></div>
+                <div><span className="text-florida-green-200">Size Guide</span></div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-florida-display font-semibold">Connect</h4>
+              <div className="space-y-2 text-sm">
+                <div className="text-florida-green-200">hello@oldflorida.com</div>
+                <div className="text-florida-green-200">(321) 555-ARTS</div>
+                <div className="text-florida-green-200">Florida, USA</div>
+                <div className="flex items-center space-x-2 text-florida-green-200">
+                  <Star className="h-4 w-4 fill-current" />
+                  <span>4.9/5 Customer Rating</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-florida-green-700 mt-8 pt-8 text-center text-sm text-florida-green-200">
+            <p>&copy; 2024 Old Florida Art Co. All rights reserved. Made with ❤️ in the Sunshine State.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 } 

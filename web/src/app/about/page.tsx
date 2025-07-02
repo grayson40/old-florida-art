@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { ArrowRight, Heart, Users, Palette, Award, Flower, Leaf, Camera, MapPin } from 'lucide-react'
+import { ArrowRight, Heart, Users, Palette, Award, Flower, Leaf, Camera, MapPin, Star } from 'lucide-react'
 
 export default function AboutPage() {
   return (
@@ -31,12 +31,9 @@ export default function AboutPage() {
         
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <div className="space-y-6">
-            <h1 className="font-florida-script text-6xl sm:text-7xl lg:text-8xl text-florida-green-800 drop-shadow-sm">
+            <h1 className="font-florida-script text-5xl sm:text-6xl lg:text-7xl text-florida-green-800 mb-6">
               Our Story
             </h1>
-            <h2 className="font-florida-display text-2xl sm:text-3xl lg:text-4xl text-florida-green-700 font-semibold">
-              Celebrating Florida&apos;s Timeless Beauty
-            </h2>
             <p className="font-florida-body text-lg sm:text-xl text-florida-green-600 max-w-3xl mx-auto leading-relaxed">
               Born from a deep love for Florida&apos;s natural beauty and rich heritage, 
               Old Florida Art Co. creates vintage-inspired artwork that captures the soul 
@@ -98,7 +95,7 @@ export default function AboutPage() {
             <div className="relative">
               <div className="aspect-[4/5] rounded-lg overflow-hidden shadow-xl">
                 <img
-                  src="https://images.unsplash.com/photo-1594736797933-d0b22ba58871?w=600&h=750&fit=crop"
+                  src="/hibiscus-painting.jpg"
                   alt="Florida hibiscus garden"
                   className="w-full h-full object-cover"
                 />
@@ -328,39 +325,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Contact Info */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-florida-green-50/30">
-        <div className="max-w-4xl mx-auto">
-          <Card className="bg-white border-florida-sand-200">
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                <div className="space-y-2">
-                  <h3 className="font-florida-display font-semibold text-florida-green-800">
-                    Get in Touch
-                  </h3>
-                  <p className="text-florida-green-600">hello@oldflorida.com</p>
-                  <p className="text-florida-green-600">(321) 555-ARTS</p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="font-florida-display font-semibold text-florida-green-800">
-                    Follow Our Story
-                  </h3>
-                  <p className="text-florida-green-600">@oldfloridaart</p>
-                  <p className="text-sm text-florida-green-500">Share your Florida moments</p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="font-florida-display font-semibold text-florida-green-800">
-                    Based in Florida
-                  </h3>
-                  <p className="text-florida-green-600">Space Coast</p>
-                  <p className="text-sm text-florida-green-500">Where surf meets space</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="bg-florida-green-800 text-florida-green-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -368,23 +332,34 @@ export default function AboutPage() {
             <div className="space-y-4">
               <h3 className="font-florida-script text-2xl">Old Florida</h3>
               <p className="text-sm text-florida-green-200">
-                Celebrating Florida&apos;s heritage through vintage-inspired art.
+                Celebrating Florida's heritage through vintage-inspired art that 
+                brings the beauty of the Sunshine State to your home.
               </p>
+              <div className="flex space-x-4">
+                <Badge variant="outline" className="text-xs text-florida-green-200 border-florida-green-600">
+                  Made in Florida
+                </Badge>
+                <Badge variant="outline" className="text-xs text-florida-green-200 border-florida-green-600">
+                  Premium Quality
+                </Badge>
+              </div>
             </div>
             <div className="space-y-4">
               <h4 className="font-florida-display font-semibold">Shop</h4>
               <div className="space-y-2 text-sm">
-                <div><Link href="/prints" className="text-florida-green-200 hover:text-white">All Prints</Link></div>
-                <div><Link href="/collections" className="text-florida-green-200 hover:text-white">Collections</Link></div>
-                <div><Link href="/new" className="text-florida-green-200 hover:text-white">New Arrivals</Link></div>
+                <div><Link href="/prints" className="text-florida-green-200 hover:text-white transition-colors">All Prints</Link></div>
+                <div><Link href="/collections" className="text-florida-green-200 hover:text-white transition-colors">Collections</Link></div>
+                <div><Link href="/prints?category=bestsellers" className="text-florida-green-200 hover:text-white transition-colors">Best Sellers</Link></div>
+                <div><Link href="/prints?filter=new" className="text-florida-green-200 hover:text-white transition-colors">New Arrivals</Link></div>
               </div>
             </div>
             <div className="space-y-4">
               <h4 className="font-florida-display font-semibold">Learn</h4>
               <div className="space-y-2 text-sm">
-                <div><Link href="/about" className="text-florida-green-200 hover:text-white">Our Story</Link></div>
-                <div><Link href="/collections/tropical-blooms" className="text-florida-green-200 hover:text-white">Tropical Blooms</Link></div>
-                <div><Link href="/collections/surf-breaks" className="text-florida-green-200 hover:text-white">Surf Culture</Link></div>
+                <div><Link href="/about" className="text-florida-green-200 hover:text-white transition-colors">Our Story</Link></div>
+                <div><Link href="/collections" className="text-florida-green-200 hover:text-white transition-colors">Art Collections</Link></div>
+                <div><span className="text-florida-green-200">Print Care Guide</span></div>
+                <div><span className="text-florida-green-200">Size Guide</span></div>
               </div>
             </div>
             <div className="space-y-4">
@@ -393,11 +368,15 @@ export default function AboutPage() {
                 <div className="text-florida-green-200">hello@oldflorida.com</div>
                 <div className="text-florida-green-200">(321) 555-ARTS</div>
                 <div className="text-florida-green-200">Florida, USA</div>
+                <div className="flex items-center space-x-2 text-florida-green-200">
+                  <Star className="h-4 w-4 fill-current" />
+                  <span>4.9/5 Customer Rating</span>
+                </div>
               </div>
             </div>
           </div>
           <div className="border-t border-florida-green-700 mt-8 pt-8 text-center text-sm text-florida-green-200">
-            <p>&copy; 2024 Old Florida Art Co. Celebrating the Sunshine State&apos;s timeless beauty.</p>
+            <p>&copy; 2024 Old Florida Art Co. All rights reserved. Made with ❤️ in the Sunshine State.</p>
           </div>
         </div>
       </footer>

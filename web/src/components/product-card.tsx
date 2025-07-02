@@ -6,8 +6,9 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ShoppingCart, Heart, X, Flower } from 'lucide-react'
+import { ShoppingCart, Heart, Star, Sparkles, Eye, Plus } from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
+import { QuickAddModal } from '@/components/quick-add-modal'
 
 interface ProductCardProps {
   id: string
@@ -20,9 +21,6 @@ interface ProductCardProps {
   isFeatured?: boolean
 }
 
-const sizes = ['12" x 16"', '16" x 20"', '18" x 24"', '24" x 32"']
-const frames = ['Unframed', 'Black Frame', 'White Frame', 'Natural Wood']
-
 export function ProductCard({
   id,
   title,
@@ -34,32 +32,8 @@ export function ProductCard({
   isFeatured = false
 }: ProductCardProps) {
   const [showQuickAdd, setShowQuickAdd] = useState(false)
-  const [selectedSize, setSelectedSize] = useState('')
-  const [selectedFrame, setSelectedFrame] = useState('')
   const [isLiked, setIsLiked] = useState(false)
-  const { dispatch } = useCart()
-
-  const handleQuickAdd = () => {
-    if (selectedSize && selectedFrame) {
-      dispatch({
-        type: 'ADD_ITEM',
-        payload: {
-          id,
-          title,
-          style,
-          price,
-          originalPrice,
-          image,
-          size: selectedSize,
-          frame: selectedFrame,
-          quantity: 1
-        }
-      })
-      setShowQuickAdd(false)
-      setSelectedSize('')
-      setSelectedFrame('')
-    }
-  }
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   const handleQuickAddClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -73,218 +47,159 @@ export function ProductCard({
     setIsLiked(!isLiked)
   }
 
+  const discountPercentage = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0
+
   return (
     <>
-      <Card className="group hover:shadow-2xl hover:shadow-florida-green-200/20 transition-all duration-700 overflow-hidden border border-florida-sand-200/50 bg-white/80 backdrop-blur-sm rounded-2xl">
-        <div className="relative overflow-hidden">
+      <Card className="group relative overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-500 ease-out bg-white rounded-xl sm:rounded-2xl">
+        {/* Image Container */}
+        <div className="relative overflow-hidden bg-florida-sand-50">
           <Link href={`/products/${id}`} className="block">
-            <div className="aspect-[3/4] overflow-hidden bg-florida-sand-50">
+            <div className="aspect-[4/5] sm:aspect-[3/4] overflow-hidden relative">
+              {!imageLoaded && (
+                <div className="absolute inset-0 bg-florida-sand-100 animate-pulse" />
+              )}
               <Image
                 src={image}
                 alt={title}
                 width={400}
                 height={500}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.02] ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                onLoad={() => setImageLoaded(true)}
+                priority={false}
               />
+              
+              {/* Gradient overlay for better text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
           </Link>
           
-          {/* Elegant badges */}
-          <div className="absolute top-4 left-4 flex flex-col gap-2">
+          {/* Enhanced Badges - Mobile Optimized */}
+          <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex flex-col gap-1.5 sm:gap-2">
             {isNew && (
-              <Badge className="bg-gradient-to-r from-florida-flamingo-400 to-florida-sunset-400 text-white text-xs px-3 py-1.5 rounded-full font-medium shadow-lg border-0 backdrop-blur-md">
-                <Flower className="w-3 h-3 mr-1" />
-                New
+              <Badge className="bg-gradient-to-r from-florida-flamingo-500 to-florida-sunset-500 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium shadow-lg border-0 backdrop-blur-md">
+                <Sparkles className="w-3 h-3 mr-1" />
+                <span className="hidden sm:inline">New</span>
+                <span className="sm:hidden">New</span>
               </Badge>
             )}
             {isFeatured && (
-              <Badge className="bg-gradient-to-r from-florida-blue-400 to-florida-green-400 text-white text-xs px-3 py-1.5 rounded-full font-medium shadow-lg border-0 backdrop-blur-md">
-                ⭐ Featured
+              <Badge className="bg-gradient-to-r from-florida-blue-500 to-florida-green-500 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium shadow-lg border-0 backdrop-blur-md">
+                <Star className="w-3 h-3 mr-1" />
+                <span className="hidden sm:inline">Featured</span>
+                <span className="sm:hidden">★</span>
+              </Badge>
+            )}
+            {discountPercentage > 0 && (
+              <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold shadow-lg border-0 backdrop-blur-md">
+                -{discountPercentage}%
               </Badge>
             )}
           </div>
 
-          {/* Wishlist button */}
-          {/* <Button
+          {/* Wishlist Button - Touch Optimized */}
+          <Button
             variant="ghost"
             size="icon"
             onClick={handleLikeClick}
-            className="absolute top-4 right-4 w-9 h-9 bg-white/90 hover:bg-white text-florida-green-600 hover:text-florida-flamingo-500 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg backdrop-blur-sm"
+            className="absolute top-2 sm:top-3 right-2 sm:right-3 w-8 h-8 sm:w-9 sm:h-9 bg-white/90 hover:bg-white text-florida-green-600 hover:text-florida-flamingo-500 transition-all duration-300 rounded-full shadow-lg backdrop-blur-sm touch-manipulation"
           >
             <Heart className={`h-4 w-4 ${isLiked ? 'fill-current text-florida-flamingo-500' : ''}`} />
-          </Button> */}
+          </Button>
 
-          {/* Elegant overlay with quick add */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-6">
-            <Button 
-              variant="florida" 
-              size="sm" 
-              onClick={handleQuickAddClick}
-              className="transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-xl rounded-full px-6"
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Quick Add
-            </Button>
+          {/* Mobile-Friendly Quick Actions Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-3 sm:pb-4">
+            <div className="flex gap-2 sm:gap-3">
+              <Button 
+                variant="florida" 
+                size="sm" 
+                onClick={handleQuickAddClick}
+                className="transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 shadow-xl rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium touch-manipulation"
+              >
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Quick Add</span>
+                <span className="sm:hidden">Add</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                asChild
+                className="transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 delay-75 shadow-xl rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm bg-white/95 backdrop-blur-sm border-white text-florida-green-700 hover:bg-florida-green-50 touch-manipulation"
+              >
+                <Link href={`/products/${id}`}>
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">View</span>
+                  <span className="sm:hidden">View</span>
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
 
-        <CardContent className="p-6">
-          <div className="space-y-3">
+        {/* Enhanced Content - Mobile Optimized Typography */}
+        <CardContent className="p-3 sm:p-4 md:p-5">
+          <div className="space-y-2 sm:space-y-3">
+            {/* Title with Better Hierarchy */}
             <Link href={`/products/${id}`} className="block group/title">
-              <h3 className="font-florida-display text-lg font-semibold text-florida-green-800 group-hover/title:text-florida-green-600 transition-colors duration-300 line-clamp-2 leading-tight">
+              <h3 className="font-florida-display text-sm sm:text-base md:text-lg font-semibold text-florida-green-800 group-hover/title:text-florida-green-600 transition-colors duration-300 line-clamp-2 leading-tight tracking-tight">
                 {title}
               </h3>
             </Link>
             
-            <p className="text-sm text-florida-green-600 font-medium uppercase tracking-wider opacity-80">
+            {/* Style Tag - Improved Mobile Typography */}
+            <p className="text-xs sm:text-sm text-florida-green-600/80 font-medium uppercase tracking-wide">
               {style}
             </p>
             
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex items-baseline space-x-2">
-                <span className="text-2xl font-bold font-florida-display text-florida-green-800">
+            {/* Price Section - Enhanced for Mobile */}
+            <div className="flex items-center justify-between pt-1 sm:pt-2">
+              <div className="flex items-baseline space-x-1 sm:space-x-2">
+                <span className="text-lg sm:text-xl md:text-2xl font-bold font-florida-display text-florida-green-800">
                   ${price}
                 </span>
                 {originalPrice && (
-                  <span className="text-sm text-florida-green-500 line-through opacity-75">
+                  <span className="text-xs sm:text-sm text-florida-green-500/70 line-through">
                     ${originalPrice}
                   </span>
                 )}
               </div>
               
+              {/* Savings Badge - Mobile Optimized */}
               {originalPrice && (
-                <Badge variant="outline" className="border-florida-flamingo-300 text-florida-flamingo-600 text-xs px-2 py-1 rounded-full">
-                  Save ${originalPrice - price}
+                <Badge variant="outline" className="border-florida-flamingo-300 text-florida-flamingo-600 text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium bg-florida-flamingo-50">
+                  <span className="hidden sm:inline">Save </span>${originalPrice - price}
                 </Badge>
               )}
             </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Elegant Quick Add Modal */}
-      {showQuickAdd && (
-        <>
-          <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity duration-300"
-            onClick={() => setShowQuickAdd(false)}
-          />
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl z-50 w-full max-w-lg mx-4 overflow-hidden">
-            {/* Modal Header */}
-            <div className="relative bg-gradient-to-r from-florida-green-50 to-florida-blue-50 p-6 border-b border-florida-sand-200">
-              <div className="absolute top-4 right-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowQuickAdd(false)}
-                  className="text-florida-green-600 hover:text-florida-green-800 hover:bg-white/80 rounded-full"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-              
-              <h3 className="text-xl font-florida-script text-florida-green-800 mb-2">
-                Add to Cart
-              </h3>
-              <p className="text-sm text-florida-green-600">
-                Choose your preferred size and frame
-              </p>
-            </div>
-
-            <div className="p-6">
-              {/* Product Preview */}
-              <div className="flex space-x-4 mb-6 p-4 bg-florida-sand-50/50 rounded-xl">
-                <div className="w-20 h-24 relative rounded-lg overflow-hidden shadow-md">
-                  <Image
-                    src={image}
-                    alt={title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-florida-display font-semibold text-florida-green-800 mb-1 line-clamp-2">
-                    {title}
-                  </h4>
-                  <p className="text-sm text-florida-green-600 mb-2 uppercase tracking-wide">
-                    {style}
-                  </p>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg font-bold text-florida-green-800">${price}</span>
-                    {originalPrice && (
-                      <span className="text-sm text-florida-green-500 line-through">
-                        ${originalPrice}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Size Selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-florida-green-800 mb-3">
-                  Size
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`p-3 text-sm border-2 rounded-xl transition-all duration-200 ${
-                        selectedSize === size
-                          ? 'border-florida-green-500 bg-florida-green-50 text-florida-green-800 font-semibold'
-                          : 'border-florida-sand-300 text-florida-green-600 hover:border-florida-green-300 hover:bg-florida-green-50/50'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Frame Selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-florida-green-800 mb-3">
-                  Frame
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {frames.map((frame) => (
-                    <button
-                      key={frame}
-                      onClick={() => setSelectedFrame(frame)}
-                      className={`p-3 text-sm border-2 rounded-xl transition-all duration-200 ${
-                        selectedFrame === frame
-                          ? 'border-florida-green-500 bg-florida-green-50 text-florida-green-800 font-semibold'
-                          : 'border-florida-sand-300 text-florida-green-600 hover:border-florida-green-300 hover:bg-florida-green-50/50'
-                      }`}
-                    >
-                      {frame}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Add to Cart Button */}
-              <Button
-                onClick={handleQuickAdd}
-                disabled={!selectedSize || !selectedFrame}
+            {/* Mobile-Only Quick Add Button */}
+            <div className="pt-2 sm:hidden">
+              <Button 
+                onClick={handleQuickAddClick}
                 variant="florida"
-                size="lg"
-                className="w-full text-lg py-3 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                size="sm"
+                className="w-full rounded-lg text-sm font-medium touch-manipulation"
               >
-                <ShoppingCart className="h-5 w-5 mr-2" />
+                <ShoppingCart className="h-4 w-4 mr-2" />
                 Add to Cart
               </Button>
-              
-              {(!selectedSize || !selectedFrame) && (
-                <p className="text-xs text-florida-green-500 text-center mt-2">
-                  Please select both size and frame options
-                </p>
-              )}
             </div>
           </div>
-        </>
-      )}
+        </CardContent>
+
+        {/* Subtle border animation on hover */}
+        <div className="absolute inset-0 rounded-xl sm:rounded-2xl border-2 border-transparent group-hover:border-florida-green-200 transition-colors duration-500 pointer-events-none" />
+      </Card>
+
+      {/* Enhanced Quick Add Modal */}
+      <QuickAddModal
+        isOpen={showQuickAdd}
+        onClose={() => setShowQuickAdd(false)}
+        productId={id}
+      />
     </>
   )
 } 

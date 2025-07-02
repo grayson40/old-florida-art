@@ -1,0 +1,12 @@
+{
+    "name": "old-florida-art",
+    "version": 2,
+    "scope": "volare-solutions",
+    "buildCommand": "npm run build",
+    "outputDirectory": ".next",
+    "installCommand": "npm install",
+    "framework": "nextjs",
+    "regions": [
+        "iad1"
+    ]
+}
