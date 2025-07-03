@@ -158,7 +158,7 @@ export function ProductCard({
             <div className="flex items-center justify-between pt-1 sm:pt-2">
               <div className="flex items-baseline space-x-1 sm:space-x-2">
                 <span className="text-lg sm:text-xl md:text-2xl font-bold font-florida-display text-florida-green-800">
-                  ${price}
+                  ${price.toFixed(2)}
                 </span>
                 {originalPrice && (
                   <span className="text-xs sm:text-sm text-florida-green-500/70 line-through">

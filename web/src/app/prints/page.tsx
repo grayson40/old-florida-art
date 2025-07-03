@@ -32,6 +32,7 @@ import {
   LayoutGrid
 } from 'lucide-react'
 import { useGootenProducts, type TransformedProduct } from '@/hooks/use-gooten-products'
+import { Footer } from '@/components/footer'
 
 const ITEMS_PER_PAGE = 12
 
@@ -712,6 +713,7 @@ function PrintsPageContent() {
           </main>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }
